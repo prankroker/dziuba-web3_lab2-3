@@ -4,5 +4,5 @@
 export type { AssetToken } from './AssetToken.js';
 export type { DexPool } from './DexPool.js';
 export * as factories from './factories/index.js';
-export { DexPool__factory } from './factories/DexPool__factory.js';
 export { AssetToken__factory } from './factories/AssetToken__factory.js';
+export { DexPool__factory } from './factories/DexPool__factory.js';

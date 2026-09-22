@@ -10,6 +10,8 @@ contract DexPool {
     uint256 public reserveA;
     uint256 public reserveB;
 
+    event Swap(address indexed trader, uint256 amountIn, uint256 amountOut);
+
     constructor(address _tokenA, address _tokenB) {
         tokenA = IERC20(_tokenA);
         tokenB = IERC20(_tokenB);
@@ -26,6 +28,7 @@ contract DexPool {
     function swapAforB(uint256 amountInA) external {
         require(amountInA > 0, "Amount must be greater than zero");
         require(reserveA > 0 && reserveB > 0, "Pool has no liquidity");
+
         uint256 feeMultiplier = 999;
         if (amountInA * 100 > reserveA * 5) {
             feeMultiplier = 990;
@@ -43,5 +46,7 @@ contract DexPool {
 
         tokenA.transferFrom(msg.sender, address(this), amountInA);
         tokenB.transfer(msg.sender, amountOutB);
+
+        emit Swap(msg.sender, amountInA, amountOutB);
     }
 }

@@ -10,17 +10,17 @@ import * as Contracts from "./index.js";
 
 declare module "@nomicfoundation/hardhat-ethers/types" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
-  getContractFactory(name: 'DexPool', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.DexPool__factory>
-getContractFactory(name: 'AssetToken', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.AssetToken__factory>
+  getContractFactory(name: 'AssetToken', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.AssetToken__factory>
+getContractFactory(name: 'DexPool', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.DexPool__factory>
 
-  getContractAt(name: 'DexPool', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.DexPool>
-getContractAt(name: 'AssetToken', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.AssetToken>
+  getContractAt(name: 'AssetToken', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.AssetToken>
+getContractAt(name: 'DexPool', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.DexPool>
 
-  deployContract(name: 'DexPool', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.DexPool>
-deployContract(name: 'AssetToken', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetToken>
+  deployContract(name: 'AssetToken', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetToken>
+deployContract(name: 'DexPool', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.DexPool>
 
-  deployContract(name: 'DexPool', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.DexPool>
-deployContract(name: 'AssetToken', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetToken>
+  deployContract(name: 'AssetToken', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetToken>
+deployContract(name: 'DexPool', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.DexPool>
 
     // default types
     getContractFactory(
