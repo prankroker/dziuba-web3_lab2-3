@@ -1,57 +1,36 @@
-# Sample Hardhat 3 Project (`mocha` and `ethers`)
+<img width="690" height="68" alt="image" src="https://github.com/user-attachments/assets/f48125b7-6f32-4f56-9479-cf9fe2f5e508" />
+<img width="800" height="349" alt="image" src="https://github.com/user-attachments/assets/6ebd5c42-ca20-4bfa-bf33-7cf50d94fb3d" />
 
-This project showcases a Hardhat 3 project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+## Контрольні запитання
 
-To learn more about Hardhat 3, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3](https://hardhat.org/hardhat3-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+### 1. Поясніть концепцію проковзування ціни (slippage) в моделі x · y = k. Чому при продажі великого обсягу активу відносно резервів пулу трейдер отримує гірший курс?
+У моделі константного добутку Automated Market Maker (AMM) ціна формується співвідношенням поточних резервів у пулі ($y / x$). Графік формули $x \cdot y = k$ являє собою опуклу гіперболу.
 
-## Project Overview
+Коли трейдер вносить великий обсяг вхідного активу $\Delta x$, він суттєво збільшує резерв $x$ і водночас вилучає значну частку активу $y$. Через це гранична вартість кожної наступної одиниці вихідного токена всередині однієї й тієї самої транзакції прогресивно зростає. У результаті фактичний середній курс виконання обміну суттєво відхиляється від початкового спотового курсу в гірший для трейдера бік. Це явище і називається проковзуванням ціни (slippage). Чим більша частка резервів пулу задіяна в транзакції, тим помітнішим стає slippage.
 
-This example project includes:
+---
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+### 2. Яким чином константа k змінюється при виконанні функції swapAforB у нашій реалізації? Чому вона зростає?
+У базовій теоретичній моделі без комісій інваріант залишається сталим: $(x + \Delta x)(y - \Delta y) = k$. 
 
-## Usage
+Проте в реалізованому контракті під час обміну стягується торгова комісія (fee). При розрахунку вихідної суми $\Delta y$ використовується лише частина вхідного обсягу з урахуванням множника (наприклад, 99.7% або 99.9% / 99.0% для динамічної комісії). Водночас у пул фактично зараховується повний обсяг вхідного токена $\Delta x$ без відрахувань. 
 
-### Running Tests
+Оскільки в пул надходить більше активу, ніж вилучається за формулою без комісії, новий баланс пулу задовольняє нерівність:
+$$k_{new} = (x + \Delta x) \cdot (y - \Delta y) > k_{old}$$
+Константа $k$ строго монотонно зростає після кожного успішного обміну. Це зростання є математичною винагородою для провайдерів ліквідності (LP), оскільки збільшує сумарну вартість пулу.
 
-To run all the tests in the project, execute the following command:
+---
 
-```shell
-npx hardhat test
-```
+### 3. Що таке механізм approve у стандарті ERC-20 і чому трейдер зобов'язаний його викликати перед тим, як зробити swap?
+У стандарті токенів ERC-20 функція `transfer` дозволяє відправляти активи лише безпосередньо з адреси того, хто підписує транзакцію (`msg.sender`). 
 
-You can also selectively run the Solidity or `mocha` tests:
+Для виконання децентралізованого обміну смарт-контракт пулу `DexPool` повинен самостійно забрати токени з гаманця користувача за допомогою функції `transferFrom`. З міркувань безпеки смарт-контракт не має права доступу до балансів трейдерів без їхньої попередньої явної згоди.
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
+Механізм `approve(address spender, uint256 amount)` дозволяє власнику токенів авторизувати сторонній контракт (`spender`, у нашому випадку адресу пулу) на списання визначеного ліміту коштів (`allowance`). Якщо трейдер не викличе `approve` перед викликом функції `swapAforB`, виконання методу `transferFrom` завершиться помилкою (revert), а вся транзакція скасується.
 
-### Make a deployment to Sepolia
+---
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+### 4. У чому полягає ризик непостійних втрат (Impermanent Loss) для провайдера ліквідності?
+Непостійні втрати (Impermanent Loss, IL) — це різниця між сумарною фінансовою вартістю активів, наданих провайдером у пул ліквідності, та вартістю тих самих активів, якби провайдер просто утримував їх на своєму гаманці (стратегія Buy & Hold / HODL).
 
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+Коли ринкова ціна активів змінюється, арбітражери починають скуповувати з пулу актив, що дорожчає, залишаючи в ньому більше здешевленого активу, щоб вирівняти внутрішню ціну AMM із зовнішнім ринком. У результаті провайдер ліквідності мимоволі «продає переможців і скуповує аутсайдерів». Якщо провайдер забере ліквідність у момент розбіжності цін, ці втрати будуть зафіксовані. Вони називаються «непостійними», оскільки якщо відносний курс активів повернеться до значення на момент внесення ліквідності, ці втрати зведуться до нуля.
