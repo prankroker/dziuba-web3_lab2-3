@@ -4,6 +4,8 @@
 ![img_3.png](img_3.png)
 ![img_4.png](img_4.png)
 ![img_5.png](img_5.png)
+<img width="1004" height="389" alt="image" src="https://github.com/user-attachments/assets/577c401f-d839-4540-a575-9a6c17f9d75f" />
+
 
 ## Контрольні запитання
 
