@@ -1,57 +1,28 @@
-# Sample Hardhat 3 Project (`mocha` and `ethers`)
+<img width="965" height="592" alt="image" src="https://github.com/user-attachments/assets/a82fef0a-b422-42f0-98cd-5686c5aa64da" />
+## Відповіді на контрольні запитання
 
-This project showcases a Hardhat 3 project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+**1. У чому полягає різниця між смарт-контрактами Factory та Router у протоколах децентралізованого обміну? З яким із них зазвичай взаємодіють кінцеві користувачі?**
+* Контракт Factory відповідає за створення нових пулів ліквідності (контрактів пар), де безпосередньо зберігаються токени. 
+* Ці пули є максимально оптимізованими та не містять зайвих перевірок.
+* Контракт Router виступає як зручний "міст" між пулами та користувачами або смарт-контрактами. 
+* Router бере на себе всі математичні розрахунки, гарантує скасування транзакції при невиконанні умов обміну та захищає від проковзування ціни (slippage). 
+* Кінцеві користувачі та зовнішні смарт-контракти зазвичай взаємодіють саме з контрактом Router.
 
-To learn more about Hardhat 3, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3](https://hardhat.org/hardhat3-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+**2. Поясніть концепцію параметрів amountOutMin (в обміні) та amountAMin / amountBMin (при наданні ліквідності). Який тип атак вони запобігають?**
+* Параметр `amountOutMin` є ключовим інструментом фінансової безпеки при обміні. 
+* Він повідомляє протоколу, що транзакцію слід відхилити (Revert), якщо внаслідок розрахунків та зняття комісій користувач отримає менше токенів, ніж це мінімальне вказане значення.
+* Параметри `amountAMin` та `amountBMin` використовуються при наданні ліквідності. 
+* У реальному середовищі вони повинні розраховуватися динамічно, щоб гарантувати, що пул не буде створено за маніпулятивним курсом. 
+* Ці параметри допомагають запобігти MEV-атакам, зокрема фронтраннінгу (frontrunning).
 
-## Project Overview
+**3. Чому під час розробки контракту-посередника (як у нашому прикладі DefiIntegrator) ми змушені викликати функцію approve для Router-контракту, навіть якщо користувач вже надав approve нашому контракту?**
+* Смарт-контракт Uniswap налаштований так, що приймає кошти лише від того, хто безпосередньо викликає його функцію. 
+* У випадку інтеграції цю функцію викликає контракт `DefiIntegrator`, а не кінцевий користувач.
+* Тому користувач спочатку робить `approve` для контракту-інтегратора, щоб той міг фізично перемістити токени з гаманця користувача на свій баланс.
+* Коли токени опиняються на балансі контракту-інтегратора, він стає їхнім власником у контексті виклику, тому він зобов'язаний надати власний `approve` маршрутизатору Uniswap, щоб дозволити йому списати ці кошти для обміну або створення пулу.
 
-This example project includes:
-
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
-
-## Usage
-
-### Running Tests
-
-To run all the tests in the project, execute the following command:
-
-```shell
-npx hardhat test
-```
-
-You can also selectively run the Solidity or `mocha` tests:
-
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
-
-### Make a deployment to Sepolia
-
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+**4. Для чого у функціях Router використовується масив адрес path, і чому він не обмежується лише двома елементами?**
+* Параметр `path` визначає ланцюжок конвертації активів.
+* Масив не обмежується лише двома елементами, оскільки протокол Uniswap V2 не завжди має прямий пул ліквідності між потрібними активами. 
+* Це дозволяє здійснювати багатоступеневий обмін через проміжні активи (наприклад, маршрут `TokenA` -> `WETH` -> `TokenB`). 
+* У випадку прямого пулу створюється масив, який містить лише дві адреси.
